@@ -2,7 +2,7 @@
 It is an easy web parser agregator to get any kind of information from any website.
 
 # Purpose
-I created many small web parser, one at a time and didn't use more complete tools like scrappy because it was still too complicated.
+I created many small web parser, one at a time and didn't use more complete tools like scrappy because it was like bringing out the big guns.
 And at one time I merged all the code into a new one: **MetaParser**.
 Now the each parser is meant to do only the essential, what you need !
 All boring stuff like getting html, files and can be delegated to MetaParser.
