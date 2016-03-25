@@ -53,7 +53,7 @@ def execute_main(argv):
     for url in argv[1:]:
         # extract the name from the url
         url = fix_url(url)
-        name = re.match('(https?:\/\/)?(www\.)?(?P<website>.*)\.[a-z]{2,3}\/', url)
+        name = re.match('(https?:\/\/)?(www\.)?(?P<website>.*?)\.[a-z]{2,3}\/', url)
         name = name.groupdict()
         module_name = name["website"]
         if module_name is not "":
