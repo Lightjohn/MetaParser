@@ -22,14 +22,17 @@ class Downloader:
     }
     DEFAULT_WAIT = 1
     DEFAULT_NAME = "default"
+    
+    COOKIES = dict()
 
-    def __init__(self, output_path):
+    def __init__(self, parent, output_path):
+        self.parent = parent
         self.output_path = output_path
         self.folder_name = self.DEFAULT_NAME
         self.wait_time = self.DEFAULT_WAIT
 
     def get_html(self, url, clean=False):
-        r = requests.get(url, headers=self.headers)
+        r = requests.get(url, headers=self.headers, cookies=self.COOKIES)
         if r.status_code == 200:
             if clean:
                 if not r.encoding:
@@ -41,17 +44,15 @@ class Downloader:
             print("Invalid URL:",url)
             return ""
 
-    def get_xpath(self, url):
+    def get_xpath(self, url, xpath=None):
         web_page = self.get_html(url, True)
         if web_page:
-            return html.fromstring(web_page)
+            tree = html.fromstring(web_page)
+            if xpath is None:
+                return tree
+            else:
+                return tree.xpath(xpath)
         return None
-
-    def get_xpath(self, url, xpath):
-        tree = self.get_xpath(url)
-        if tree:
-            return tree.xpath(xpath)
-        return []
 
     def get_file(self, url, folder_name="", file_name="", verbose=False):
         if folder_name == "":
@@ -60,7 +61,7 @@ class Downloader:
             file_name = url.split("/")[-1]
         if verbose:
             print("DOWNLOADING", folder_name, file_name)
-        r = requests.get(url, headers=self.headers, stream=True)
+        r = requests.get(url, headers=self.headers, stream=True, cookies=self.COOKIES)
         self.create_folder(self.output_path + folder_name)
         with open(self.output_path + folder_name + os.sep + file_name, 'wb') as f:
             r.raw.decode_content = True
@@ -83,6 +84,9 @@ class Downloader:
         else:
             time.sleep(wait_time)
 
+    def add_cookie(self, k, v):
+        self.COOKIES[k] = v
+            
     def get_output_path(self):
         return self.output_path
 
@@ -95,6 +99,9 @@ class Downloader:
     def reset(self):
         self.folder_name = "default"
         self.wait_time = self.DEFAULT_WAIT
+        
+    def parse(self, url):
+        self.parent.execute([url])
 
     def debug(self):
         print("[DEBUG] Path: "+self.output_path+" time: "+str(self.wait_time))
