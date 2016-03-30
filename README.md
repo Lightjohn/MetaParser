@@ -89,6 +89,12 @@ self.dl.get_file(url, folder_name="default", file_name="", verbose=False)
 
 # A good parser wait before another attempt, but we can be sneaky if needed (random: 0-1sec)
 self.dl.wait(wait_time=1, random=False)
+
+# If you need to call another plugin 
+self.dl.parse(url)
+
+# Want to have shorter code, this function wil download html and return a xpath function or result depending of the input
+def get_xpath(url, xpath=None):
 ```
 I put more setter, getter and some file management functions in **metaParserUtils.py**.
 
