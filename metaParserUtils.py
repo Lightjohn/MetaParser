@@ -6,6 +6,7 @@ import os
 import time
 import random
 import os.path
+from lxml import html
 
 
 class Downloader:
@@ -39,6 +40,18 @@ class Downloader:
         else:
             print("Invalid URL:",url)
             return ""
+
+    def get_xpath(self, url):
+        web_page = self.get_html(url, True)
+        if web_page:
+            return html.fromstring(web_page)
+        return None
+
+    def get_xpath(self, url, xpath):
+        tree = self.get_xpath(url)
+        if tree:
+            return tree.xpath(xpath)
+        return []
 
     def get_file(self, url, folder_name="", file_name="", verbose=False):
         if folder_name == "":
