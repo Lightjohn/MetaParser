@@ -12,7 +12,7 @@ import traceback
 import socket
 
 sys.path.insert(0, 'hoster')    # adding local path hoster for futur import
-output_path = "/cygdrive/f/Downloads/jdownloader/John/tem/"
+output_path = expanduser("~")+os.sep+"metaParser/"
 
 class Parser:
     '''
