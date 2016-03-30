@@ -94,7 +94,7 @@ self.dl.wait(wait_time=1, random=False)
 self.dl.parse(url)
 
 # Want to have shorter code, this function wil download html and return a xpath function or result depending of the input
-def get_xpath(url, xpath=None):
+self.dl.get_xpath(url, xpath=None)
 ```
 I put more setter, getter and some file management functions in **metaParserUtils.py**.
 
