@@ -85,7 +85,9 @@ What can do *self.dl*
 self.dl.get_html(url, clean=False)
 
 # Get file, if nothing other that url if given, it will guess name and output folder
-self.dl.get_file(url, folder_name="default", file_name="", verbose=False)
+self.dl.get_file(url, folder_name="default", file_name="", async=False, verbose=False)
+
+# Async here enable or not the use of the pool. If you want faster download use async=True.
 
 # A good parser wait before another attempt, but we can be sneaky if needed (random: 0-1sec)
 self.dl.wait(wait_time=1, random=False)
@@ -95,6 +97,21 @@ self.dl.parse(url)
 
 # Want to have shorter code, this function wil download html and return a xpath function or result depending of the input
 self.dl.get_xpath(url, xpath=None)
+
+# To launch an entire function in the pool.
+# Warning: Do not put heavy computation, just IO stuff
+self.dl.launch_async(func, args):
+
 ```
+
+# Pool
+
+If you want to have parallel downloads:
+`
+python3 metaParser.py -n X https://news.google.com/
+`
+
+With X the download pool size. Be fair, do not put too high value here.
+
 I put more setter, getter and some file management functions in **metaParserUtils.py**.
 
