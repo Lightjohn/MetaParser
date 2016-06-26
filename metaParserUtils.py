@@ -6,6 +6,7 @@ import os
 import time
 import random
 import os.path
+from multiprocessing.pool import ThreadPool as Pool
 from lxml import html
 
 
@@ -22,14 +23,18 @@ class Downloader:
     }
     DEFAULT_WAIT = 1
     DEFAULT_NAME = "default"
-    
+
     COOKIES = dict()
 
-    def __init__(self, parent, output_path):
+    def __init__(self, parent, output_path, nb_downloads=4):
         self.parent = parent
         self.output_path = output_path
         self.folder_name = self.DEFAULT_NAME
         self.wait_time = self.DEFAULT_WAIT
+        self.pool = Pool(processes=nb_downloads)
+
+    def __del__(self):
+        pass
 
     def get_html(self, url, clean=False):
         r = requests.get(url, headers=self.headers, cookies=self.COOKIES)
@@ -41,7 +46,7 @@ class Downloader:
             else:
                 return r.text
         else:
-            print("Invalid URL:",url)
+            print("Invalid URL:", url)
             return ""
 
     def get_xpath(self, url, xpath=None):
@@ -54,27 +59,44 @@ class Downloader:
                 return tree.xpath(xpath)
         return None
 
-    def get_file(self, url, folder_name="", file_name="", verbose=False):
-        if folder_name == "":
-            folder_name = self.folder_name
-        if file_name is "":
-            file_name = url.split("/")[-1]
-        if verbose:
-            print("DOWNLOADING", folder_name, file_name)
+    def create_folder(self, path):
+        try:
+            os.makedirs(path)
+        except OSError:
+            pass
+
+    def download(self, url, folder_name, file_name):
         r = requests.get(url, headers=self.headers, stream=True, cookies=self.COOKIES)
         self.create_folder(self.output_path + folder_name)
         with open(self.output_path + folder_name + os.sep + file_name, 'wb') as f:
             r.raw.decode_content = True
             shutil.copyfileobj(r.raw, f)
 
+    def hello(self, name):
+        print("hello", name)
+
+    def heelo(self, name):
+        print("sur hello", name)
+
+    def get_file(self, url, folder_name="", file_name="", async=False,verbose=False):
+        if folder_name == "":
+            folder_name = self.folder_name
+        elif self.folder_name != self.DEFAULT_NAME:
+            folder_name = self.folder_name + os.sep + folder_name
+        if file_name is "":
+            file_name = url.split("/")[-1]
+        if verbose:
+            print("DOWNLOADING", folder_name, file_name)
+        if async:
+            self.pool.apply_async(self.download, (url, folder_name, file_name,))
+        else:
+            self.download(url, folder_name, file_name)
+
+    def launch_async(self, func, args):
+        return self.pool.apply_async(func, args)
+
     def file_exists(self, file_path):
         return os.path.isfile(file_path)
-
-    def create_folder(self, path):
-        try:
-            os.makedirs(path)
-        except OSError:
-            pass
 
     def wait(self, wait_time=0, random=False):
         if wait_time == 0:
@@ -86,7 +108,7 @@ class Downloader:
 
     def add_cookie(self, k, v):
         self.COOKIES[k] = v
-            
+
     def get_output_path(self):
         return self.output_path
 
@@ -99,9 +121,15 @@ class Downloader:
     def reset(self):
         self.folder_name = "default"
         self.wait_time = self.DEFAULT_WAIT
-        
+
     def parse(self, url):
         self.parent.execute([url])
 
     def debug(self):
-        print("[DEBUG] Path: "+self.output_path+" time: "+str(self.wait_time))
+        print("[DEBUG] Path: " + self.output_path + " time: " + str(self.wait_time))
+
+    def close_and_join(self):
+        self.pool.close()
+        print("Finishing DL")
+        self.pool.join()
+        print("Done")

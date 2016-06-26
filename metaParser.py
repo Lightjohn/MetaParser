@@ -10,9 +10,11 @@ import types
 import metaParserUtils
 import traceback
 import socket
+import argparse
 
-sys.path.insert(0, 'hoster')    # adding local path hoster for futur import
-output_path = expanduser("~")+os.sep+"metaParser/"
+sys.path.insert(0, 'hoster')  # adding local path hoster for futur import
+output_path = "/cygdrive/f/Downloads/jdownloader/John/tem/"
+
 
 class Parser:
     '''
@@ -31,12 +33,15 @@ class Parser:
     def parse(self, url):
         pass
 
+
 class MetaParser:
+
+    THREADS = 4
+
     def fix_object_name(self, obj_name):
         for a in ['.', '-']:
             obj_name = obj_name.replace(a, '')
         return obj_name
-
 
     def fix_url(self, url):
         # In the case where we have a simple url with no / at the end
@@ -45,7 +50,7 @@ class MetaParser:
         return url
 
     def execute(self, argv):
-        dl_utils = metaParserUtils.Downloader(self, output_path)
+        dl_utils = metaParserUtils.Downloader(self, output_path, nb_downloads=self.THREADS)
         loaded_module = dict()
         for url in argv:
             # extract the name from the url
@@ -76,18 +81,23 @@ class MetaParser:
                         print("Exception occur in", module_name, e)
                         traceback.print_exc()
                 except ImportError as e:
-                    print("Cannot load module: "+module_name+" : NOT IMPLEMENTED YET (or missing import or module dependency not installed on the system)")
+                    print(
+                        "Cannot load module: " + module_name + " : NOT IMPLEMENTED YET (or missing import or module dependency not installed on the system)")
                     traceback.print_exc()
             else:
-                print("Invalid URL found: "+url)
-        
+                print("Invalid URL found: " + url)
+        dl_utils.close_and_join()
+
     def execute_main(self, argv):
-        if len(argv) < 2:
-            print("Usage "+argv[0]+" url1 url2 ...")
-        self.execute(argv[1:])
-    
+        parser = argparse.ArgumentParser(
+            description='Handle url and will git them to the good module')
+        parser.add_argument('-n',  type=int, default=4,help='Number of downloads in parallel')
+        parser.add_argument('urls', metavar='N', nargs='+', help='an infinite numbers of URLS')
+        input_args = parser.parse_args()
+        self.THREADS = input_args.n
+        self.execute(input_args.urls)
+
 
 if __name__ == "__main__":
     a = MetaParser()
     a.execute_main(sys.argv)
-
