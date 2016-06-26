@@ -72,12 +72,6 @@ class Downloader:
             r.raw.decode_content = True
             shutil.copyfileobj(r.raw, f)
 
-    def hello(self, name):
-        print("hello", name)
-
-    def heelo(self, name):
-        print("sur hello", name)
-
     def get_file(self, url, folder_name="", file_name="", async=False,verbose=False):
         if folder_name == "":
             folder_name = self.folder_name
