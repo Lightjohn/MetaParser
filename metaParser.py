@@ -12,7 +12,8 @@ import traceback
 import socket
 import argparse
 
-sys.path.insert(0, 'hoster')  # adding local path hoster for futur import
+# adding local path hoster for futur import, taken from the location of this file
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__))+os.sep+"hoster")
 output_path = expanduser("~")+os.sep+"metaParser/"
 
 
@@ -35,21 +36,44 @@ class Parser:
 
 
 class MetaParser:
-
+    """
+        Metaparser is the main class that will read the input and will find and launch the module linked to the url.
+    """
     THREADS = 4
+    DEBUG = False
 
     def fix_object_name(self, obj_name):
+        """
+        Function that will remove every forbidden character in an url.
+
+        :param obj_name:
+        :return:
+        """
         for a in ['.', '-']:
             obj_name = obj_name.replace(a, '')
         return obj_name
 
     def fix_url(self, url):
-        # In the case where we have a simple url with no / at the end
+        """
+        In the case where we have a simple url with no / at the end.
+
+        :param url:
+        :return:
+        """
         if "/" not in url.replace("://", ""):
             url += "/"
         return url
 
     def execute(self, argv):
+        """
+        For every url:
+            We purify the url, then we extract the core name of the url
+            we try to load a module according to the core name
+            Then we launch the module if everything is good
+
+        :param argv:
+        :return:
+        """
         dl_utils = metaParserUtils.Downloader(self, output_path, nb_downloads=self.THREADS)
         loaded_module = dict()
         for url in argv:
@@ -79,11 +103,13 @@ class MetaParser:
                         m.parse(url)
                     except Exception as e:
                         print("Exception occur in", module_name, e)
-                        traceback.print_exc()
+                        if self.DEBUG:
+                            traceback.print_exc()
                 except ImportError as e:
                     print(
                         "Cannot load module: " + module_name + " : NOT IMPLEMENTED YET (or missing import or module dependency not installed on the system)")
-                    traceback.print_exc()
+                    if self.DEBUG:
+                        traceback.print_exc()
             else:
                 print("Invalid URL found: " + url)
         dl_utils.close_and_join()
@@ -92,8 +118,10 @@ class MetaParser:
         parser = argparse.ArgumentParser(
             description='Handle url and will git them to the good module')
         parser.add_argument('-n',  type=int, default=4,help='Number of downloads in parallel')
+        parser.add_argument('-d', action='store_true', default=False,help='Enable debug output')
         parser.add_argument('urls', metavar='N', nargs='+', help='an infinite numbers of URLS')
         input_args = parser.parse_args()
+        self.DEBUG = input_args.d
         self.THREADS = input_args.n
         self.execute(input_args.urls)
 
