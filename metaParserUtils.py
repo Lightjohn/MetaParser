@@ -27,7 +27,7 @@ class Downloader:
     COOKIES = dict()
     AUTH = ()
 
-    def __init__(self, parent, output_path, nb_downloads=4):
+    def __init__(self, parent=None, output_path="", nb_downloads=4):
         self.parent = parent
         self.output_path = output_path
         self.folder_name = self.DEFAULT_NAME
@@ -200,7 +200,15 @@ class Downloader:
         self.wait_time = self.DEFAULT_WAIT
 
     def parse(self, url):
-        self.parent.execute([url])
+        """
+        If we want to add a new url to the parser we will call the parent
+        :param url:
+        :return:
+        """
+        if self.parent:
+            self.parent.execute([url])
+        else:
+            print("No parent was given so the nothing will be done")
 
     def debug(self):
         print("[DEBUG] Path: " + self.output_path + " time: " + str(self.wait_time))
