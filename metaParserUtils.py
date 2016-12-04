@@ -8,6 +8,8 @@ import random
 import os.path
 from multiprocessing.pool import ThreadPool as Pool
 from lxml import html
+from lxml.etree import tostring
+from itertools import chain
 
 
 class Downloader:
@@ -223,3 +225,10 @@ class Downloader:
         print("Finishing DL")
         self.pool.join()
         print("Done")
+
+    def element_to_string(self, node):
+        parts = ([node.text] +
+                 list(chain(*([c.text, tostring(c), c.tail] for c in node.getchildren()))) +
+                 [node.tail])
+        # filter removes possible Nones in texts and tails
+        return ''.join(filter(None, parts))
