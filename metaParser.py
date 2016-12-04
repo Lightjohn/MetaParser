@@ -18,11 +18,11 @@ output_path = expanduser("~")+os.sep+"metaParser/"
 
 
 class Parser:
-    '''
+    """
     Every parser should implement this class and overload parser
     Contains:
         dl (downloader tool wrapping requests)
-    '''
+    """
 
     def __init__(self, dl_util):
 
@@ -105,20 +105,22 @@ class MetaParser:
                         print("Exception occur in", module_name, e)
                         if self.DEBUG:
                             traceback.print_exc()
-                except ImportError as e:
+                except ImportError:
                     print(
-                        "Cannot load module: " + module_name + " : NOT IMPLEMENTED YET (or missing import or module dependency not installed on the system)")
+                        "Cannot load module: " + module_name +
+                        " : NOT IMPLEMENTED YET (or missing import or module dependency "
+                        "not installed on the system)")
                     if self.DEBUG:
                         traceback.print_exc()
             else:
                 print("Invalid URL found: " + url)
         dl_utils.close_and_join()
 
-    def execute_main(self, argv):
+    def execute_main(self):
         parser = argparse.ArgumentParser(
             description='Handle url and will git them to the good module')
-        parser.add_argument('-n',  type=int, default=4,help='Number of downloads in parallel')
-        parser.add_argument('-d', action='store_true', default=False,help='Enable debug output')
+        parser.add_argument('-n', type=int, default=4, help='Number of downloads in parallel')
+        parser.add_argument('-d', action='store_true', default=False, help='Enable debug output')
         parser.add_argument('urls', metavar='N', nargs='+', help='an infinite numbers of URLS')
         input_args = parser.parse_args()
         self.DEBUG = input_args.d
@@ -128,4 +130,4 @@ class MetaParser:
 
 if __name__ == "__main__":
     a = MetaParser()
-    a.execute_main(sys.argv)
+    a.execute_main()
