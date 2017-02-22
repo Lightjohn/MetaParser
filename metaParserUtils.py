@@ -35,6 +35,7 @@ class Downloader:
         self.folder_name = self.DEFAULT_NAME
         self.wait_time = self.DEFAULT_WAIT
         self.pool = Pool(processes=nb_downloads)
+        self.retry = 1
 
     def __del__(self):
         pass
@@ -47,8 +48,13 @@ class Downloader:
         :param clean: force the output to be converted to utf-8
         :return:
         """
-        r = requests.get(url, headers=self.headers, auth=self.AUTH, cookies=self.COOKIES)
-        if r.status_code == 200:
+        for i in range(self.retry + 1):
+            try:
+                r = requests.get(url, headers=self.headers, auth=self.AUTH, cookies=self.COOKIES)
+                break
+            except Exception as e:
+                print("ERROR get failed "+e)
+        if r and r.status_code == 200:
             if clean:
                 if not r.encoding:
                     r.encoding = "utf8"
@@ -89,6 +95,13 @@ class Downloader:
         except OSError:
             pass
 
+    def _download(self, url, folder_name, file_name):
+        r = requests.get(url, headers=self.headers, stream=True, auth=self.AUTH, cookies=self.COOKIES)
+        self.create_folder(self.output_path + folder_name)
+        with open(self.output_path + folder_name + os.sep + file_name, 'wb') as f:
+            r.raw.decode_content = True
+            shutil.copyfileobj(r.raw, f)
+
     def download(self, url, folder_name, file_name):
         """
         This function will download as a file the url.
@@ -99,11 +112,15 @@ class Downloader:
         :param file_name: the name of the file
         :return:
         """
-        r = requests.get(url, headers=self.headers, stream=True, auth=self.AUTH, cookies=self.COOKIES)
-        self.create_folder(self.output_path + folder_name)
-        with open(self.output_path + folder_name + os.sep + file_name, 'wb') as f:
-            r.raw.decode_content = True
-            shutil.copyfileobj(r.raw, f)
+        for i in range(self.retry+1):
+            try:
+                self._download(url, folder_name, file_name)
+                break
+            except Exception as e:
+                print("ERROR while downloadind: "+e)
+                if self.retry > 0:
+                    print("Retrying")
+
 
     def get_file(self, url, folder_name="", file_name="", async=False, verbose=False):
         """
@@ -180,6 +197,12 @@ class Downloader:
 
     def set_wait_time(self, time):
         self.wait_time = time
+
+    def set_retry_value(self, retry):
+        if retry >= 0:
+            self.retry = retry
+        else:
+            self.retry = 0
 
     def set_folder_name(self, name):
         """
