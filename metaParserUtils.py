@@ -53,7 +53,7 @@ class Downloader:
                 r = requests.get(url, headers=self.headers, auth=self.AUTH, cookies=self.COOKIES)
                 break
             except Exception as e:
-                print("ERROR get failed "+e)
+                print("ERROR get failed "+str(e))
         if r and r.status_code == 200:
             if clean:
                 if not r.encoding:
