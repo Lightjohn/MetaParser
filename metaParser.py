@@ -14,7 +14,7 @@ import argparse
 
 # adding local path hoster for futur import, taken from the location of this file
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__))+os.sep+"hoster")
-output_path = expanduser("~")+os.sep+"metaParser/"
+output_path = expanduser("~")+os.sep+"metaParser"+os.sep
 
 
 class Parser:

@@ -54,6 +54,7 @@ class Downloader:
                 break
             except Exception as e:
                 print("ERROR get failed "+str(e))
+                time.sleep(2)
         if r and r.status_code == 200:
             if clean:
                 if not r.encoding:
@@ -117,7 +118,7 @@ class Downloader:
                 self._download(url, folder_name, file_name)
                 break
             except Exception as e:
-                print("ERROR while downloadind: "+e)
+                print("ERROR while downloadind: "+str(e))
                 if self.retry > 0:
                     print("Retrying")
 
